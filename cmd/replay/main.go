@@ -188,6 +188,7 @@ func main() {
 		if lastBlockHeader != nil {
 			delayedMessagesRead = lastBlockHeader.Nonce.Uint64()
 		}
+		// todo make it compatible with dasReader
 		var dasReader eigenda.EigenDAReader
 		if dasEnabled {
 			dasReader = &PreimageEigenDAReader{}

@@ -189,8 +189,9 @@ func main() {
 			delayedMessagesRead = lastBlockHeader.Nonce.Uint64()
 		}
 		// due to the lack of abstraction, we have to define our own Reader here.
-		// once we have a way to unify the interface, we should be able to retain the old struct.
+		// once we have a way to unify the interface between DataAvailabilityReader and EigenDAReader, we should be able to retain the old struct.
 		// todo make it compatible with dasReader
+		// var dasReader arbstate.DataAvailabilityReader
 		var dasReader eigenda.EigenDAReader
 		if dasEnabled {
 			dasReader = &PreimageEigenDAReader{}

@@ -1,3 +1,6 @@
+// Copyright 2024-2024, Alt Research, Inc.
+// For license information, see https://github.com/nitro/blob/master/LICENSE
+
 package eigenda
 
 import (

@@ -119,7 +119,7 @@ func (dasReader *PreimageDASReader) ExpirationPolicy(ctx context.Context) (arbst
 	return arbstate.DiscardImmediately, nil
 }
 
-// struct for recover data from preimage, impl interface EigenDAReader
+// struct for recovering data from preimage, impl interface EigenDAReader
 type PreimageEigenDAReader struct{}
 
 func (dasReader *PreimageEigenDAReader) QueryBlob(ctx context.Context, ref *eigenda.EigenDARef) ([]byte, error) {
@@ -130,7 +130,7 @@ func (dasReader *PreimageEigenDAReader) QueryBlob(ctx context.Context, ref *eige
 	shaDataHash := sha256.New()
 	shaDataHash.Write(dataPointer)
 	dataHash := shaDataHash.Sum([]byte{})
-	// check RecoverPayloadFromEigenDABatch
+	// check function eigenda.RecoverPayloadFromEigenDABatch, the data population and data reading should be matched.
 	return wavmio.ResolveTypedPreimage(arbutil.Sha2_256PreimageType, common.BytesToHash(dataHash))
 }
 
@@ -188,6 +188,8 @@ func main() {
 		if lastBlockHeader != nil {
 			delayedMessagesRead = lastBlockHeader.Nonce.Uint64()
 		}
+		// due to the lack of abstraction, we have to define our own Reader here.
+		// once we have a way to unify the interface, we should be able to retain the old struct.
 		// todo make it compatible with dasReader
 		var dasReader eigenda.EigenDAReader
 		if dasEnabled {

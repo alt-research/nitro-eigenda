@@ -82,12 +82,13 @@ func parseSequencerMessage(ctx context.Context, batchNum uint64, data []byte, da
 		}
 	}
 
+	// detect eigenda message from byte
 	if len(payload) > 0 && eigenda.IsEigenDAMessageHeaderByte(payload[0]) {
 		if eigenDAReader == nil {
 			log.Error("No EigenDA Reader configured, but sequencer message found with EigenDA header")
 		} else {
 			var err error
-			payload, err = eigenda.RecoverPayloadFromEigenDABatch(ctx, batchNum, payload[1:], eigenDAReader, nil)
+			payload, err = eigenda.RecoverPayloadFromEigenDABatch(ctx, payload[1:], eigenDAReader, nil)
 			if err != nil {
 				return nil, err
 			}

@@ -119,6 +119,7 @@ func (dasReader *PreimageDASReader) ExpirationPolicy(ctx context.Context) (arbst
 	return arbstate.DiscardImmediately, nil
 }
 
+// struct for recover data from preimage, impl interface EigenDAReader
 type PreimageEigenDAReader struct{}
 
 func (dasReader *PreimageEigenDAReader) QueryBlob(ctx context.Context, ref *eigenda.EigenDARef) ([]byte, error) {
@@ -129,6 +130,7 @@ func (dasReader *PreimageEigenDAReader) QueryBlob(ctx context.Context, ref *eige
 	shaDataHash := sha256.New()
 	shaDataHash.Write(dataPointer)
 	dataHash := shaDataHash.Sum([]byte{})
+	// check RecoverPayloadFromEigenDABatch
 	return wavmio.ResolveTypedPreimage(arbutil.Sha2_256PreimageType, common.BytesToHash(dataHash))
 }
 
@@ -186,20 +188,11 @@ func main() {
 		if lastBlockHeader != nil {
 			delayedMessagesRead = lastBlockHeader.Nonce.Uint64()
 		}
-		// var dasReader arbstate.DataAvailabilityReader
-		// if dasEnabled {
-		// 	dasReader = &PreimageDASReader{}
-		// }
 		var dasReader eigenda.EigenDAReader
 		if dasEnabled {
 			dasReader = &PreimageEigenDAReader{}
 		}
 		backend := WavmInbox{}
-		// var keysetValidationMode = arbstate.KeysetPanicIfInvalid
-		// if backend.GetPositionWithinMessage() > 0 {
-		// 	keysetValidationMode = arbstate.KeysetDontValidate
-		// }
-		// todo
 		inboxMultiplexer := arbstate.NewInboxMultiplexer(backend, delayedMessagesRead, nil, dasReader, arbstate.KeysetDontValidate)
 		ctx := context.Background()
 		message, err := inboxMultiplexer.Pop(ctx)

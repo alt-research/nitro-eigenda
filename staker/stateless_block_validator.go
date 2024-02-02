@@ -288,6 +288,9 @@ func (v *StatelessBlockValidator) ValidationEntryRecord(ctx context.Context, e *
 		if len(batch.Data) <= 40 {
 			continue
 		}
+		if !arbstate.IsDASMessageHeaderByte(batch.Data[40]) && eigenda.IsEigenDAMessageHeaderByte(batch.Data[40]) {
+			continue
+		}
 		if arbstate.IsDASMessageHeaderByte(batch.Data[40]) {
 			if v.daService == nil {
 				log.Warn("No DAS configured, but sequencer message found with DAS header")
@@ -304,7 +307,7 @@ func (v *StatelessBlockValidator) ValidationEntryRecord(ctx context.Context, e *
 			if v.eigenDAService == nil {
 				log.Warn("EigenDA not configured, but sequencer message found with EigenDA header")
 			} else {
-				_, err := eigenda.RecoverPayloadFromEigenDABatch(ctx, batch.Number, batch.Data[41:], v.eigenDAService, e.Preimages)
+				_, err := eigenda.RecoverPayloadFromEigenDABatch(ctx, batch.Data[41:], v.eigenDAService, e.Preimages)
 				if err != nil {
 					return err
 				}

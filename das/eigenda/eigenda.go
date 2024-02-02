@@ -20,7 +20,7 @@ import (
 )
 
 // EigenDAMessageHeaderFlag indicated that the message is a EigenDARef which will be used to retrieve data from EigenDA
-const EigenDAMessageHeaderFlag byte = 0x0c
+const EigenDAMessageHeaderFlag byte = 0xed
 
 func IsEigenDAMessageHeaderByte(header byte) bool {
 	return (EigenDAMessageHeaderFlag & header) > 0
@@ -177,7 +177,6 @@ func (e *EigenDA) Serialize(eigenDARef *EigenDARef) ([]byte, error) {
 }
 
 func RecoverPayloadFromEigenDABatch(ctx context.Context,
-	batchNum uint64,
 	sequencerMsg []byte,
 	daReader EigenDAReader,
 	preimages map[arbutil.PreimageType]map[common.Hash][]byte,
@@ -190,8 +189,6 @@ func RecoverPayloadFromEigenDABatch(ctx context.Context,
 		}
 		shaPreimages = preimages[arbutil.Sha2_256PreimageType]
 	}
-	// 00000020
-	// 91c127a758d669ce7c8ed915679653e87bf1dfbcf54d028c522d129c482c897d
 	var daRef EigenDARef
 	daRef.BlobIndex = binary.BigEndian.Uint32(sequencerMsg[:4])
 	daRef.BatchHeaderHash = sequencerMsg[4:]
@@ -201,7 +198,6 @@ func RecoverPayloadFromEigenDABatch(ctx context.Context,
 		log.Error("Failed to query data from EigenDA", "err", err)
 		return nil, err
 	}
-	// log.Info("data: ", "info", hex.EncodeToString(data))
 	// record preimage data
 	log.Info("Recording preimage data for EigenDA")
 	shaDataHash := sha256.New()

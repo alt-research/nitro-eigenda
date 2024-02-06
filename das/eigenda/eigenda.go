@@ -25,6 +25,8 @@ import (
 // EigenDAMessageHeaderFlag indicated that the message is a EigenDARef which will be used to retrieve data from EigenDA
 const EigenDAMessageHeaderFlag byte = 0xed
 
+var ErrBatchToEigenDA = errors.New("disperser blob failed")
+
 func IsEigenDAMessageHeaderByte(header byte) bool {
 	return (EigenDAMessageHeaderFlag & header) > 0
 }
@@ -140,7 +142,7 @@ func (e *EigenDA) Store(ctx context.Context, data []byte) (*EigenDARef, error) {
 			}
 			return ref, nil
 		case disperser.BlobStatus_FAILED:
-			return nil, errors.New("disperser blob failed")
+			return nil, ErrBatchToEigenDA
 		default:
 			continue
 		}

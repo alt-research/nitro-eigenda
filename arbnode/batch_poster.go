@@ -1043,20 +1043,23 @@ func (b *BatchPoster) maybePostSequencerBatch(ctx context.Context) (bool, error)
 	if b.daWriter == nil && b.eigenDAWriter != nil {
 		log.Info("Start to write data to eigenda: ", "data", hex.EncodeToString(sequencerMsg))
 		daRef, err := b.eigenDAWriter.Store(ctx, sequencerMsg)
-		if err != nil {
+		if errors.Is(err, eigenda.ErrBatchToEigenDA) {
 			if config.DisableEigenDAFallbackStoreDataOnChain {
 				log.Warn("Falling back to storing data on chain", "err", err)
 				return false, errors.New("unable to post batch to EigenDA and fallback storing data on chain is disabled")
 			}
+			log.Warn("Falling back to storing data on chain")
+		} else if err != nil {
+			return false, err
+		} else {
+			pointer, err := b.eigenDAWriter.Serialize(daRef)
+			if err != nil {
+				log.Warn("DaRef serialization failed", "err", err)
+				return false, errors.New("DaRef serialization failed")
+			}
+			log.Info("EigenDA transaction receipt(data pointer): ", "hash", hex.EncodeToString(daRef.BatchHeaderHash), "index", daRef.BlobIndex)
+			sequencerMsg = pointer
 		}
-
-		pointer, err := b.eigenDAWriter.Serialize(daRef)
-		if err != nil {
-			log.Warn("DaRef serialization failed", "err", err)
-			return false, errors.New("DaRef serialization failed")
-		}
-		log.Info("EigenDA transaction receipt(data pointer): ", "hash", hex.EncodeToString(daRef.BatchHeaderHash), "index", daRef.BlobIndex)
-		sequencerMsg = pointer
 	}
 
 	data, err := b.encodeAddBatch(new(big.Int).SetUint64(batchPosition.NextSeqNum), batchPosition.MessageCount, b.building.msgCount, sequencerMsg, b.building.segments.delayedMsg)

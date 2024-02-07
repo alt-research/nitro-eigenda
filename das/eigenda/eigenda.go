@@ -23,7 +23,7 @@ import (
 )
 
 // EigenDAMessageHeaderFlag indicated that the message is a EigenDARef which will be used to retrieve data from EigenDA
-const EigenDAMessageHeaderFlag byte = 0xed
+const EigenDAMessageHeaderFlag byte = 0x0e
 
 var ErrBatchToEigenDA = errors.New("disperser blob failed")
 
